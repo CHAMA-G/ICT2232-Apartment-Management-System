@@ -7,31 +7,25 @@ use Illuminate\Support\Facades\DB;
 
 class VisitorController extends Controller
 {
-    public function index()
-    {
-        return view('security.dashboard');
-    }
-
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'visitor_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'flat_number' => 'required|string|max:50',
-            'vehicle_number' => 'nullable|string|max:50',
+        $request->validate([
+            'visitor_name' => 'required|string',
+            'phone' => 'required|string',
+            'flat_number' => 'required|string',
         ]);
 
         DB::table('visitors')->insert([
-            'visitor_name' => $validated['visitor_name'],
-            'phone' => $validated['phone'],
-            'flat_number' => $validated['flat_number'],
-            'vehicle_number' => $validated['vehicle_number'] ?? null,
+            'visitor_name' => $request->visitor_name,
+            'phone' => $request->phone,
+            'vehicle_number' => $request->vehicle_number,
+            'flat_number' => $request->flat_number,
             'status' => 'Checked-In',
             'check_in_time' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        return back()->with('success', 'Visitor checked in successfully.');
+        return redirect()->back()->with('success', 'Visitor Checked-In Successfully!');
     }
 }

@@ -12,13 +12,18 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/security/dashboard', [VisitorController::class, 'index'])->name('security.dashboard');
-    Route::post('/security/visitor/check-in', [VisitorController::class, 'store'])->name('security.visitor.store');
+    Route::get('/security/dashboard', function () {
+        return view('security.dashboard');
+    })->name('security.dashboard');
+
+    Route::post('/visitor/store', [VisitorController::class, 'store'])->name('visitor.store');
 });
 
 require __DIR__.'/auth.php';
+
+
