@@ -95,6 +95,77 @@
                     </form>
                 </div>
             </div>
+
+            <div class="mt-10 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Service Requests</h3>
+
+                @if(session('service_success'))
+                    <div class="mb-4 rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-700">
+                        {{ session('service_success') }}
+                    </div>
+                @endif
+
+                <form action="{{ route('resident.store_service_request') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-6">
+                    @csrf
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="category" name="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Select category</option>
+                            <option value="Plumbing">Plumbing</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Carpentry">Carpentry</option>
+                            <option value="Cleaning">Cleaning</option>
+                            <option value="Security">Security</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description" name="description" rows="3" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <button type="submit" class="w-full bg-amber-600 text-white py-3 px-4 rounded-md hover:bg-amber-700 font-semibold transition">
+                            Submit Service Request
+                        </button>
+                    </div>
+                </form>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-semibold text-gray-700">Category</th>
+                                <th class="px-4 py-2 text-left font-semibold text-gray-700">Description</th>
+                                <th class="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @php
+                                $requests = DB::table('service_requests')->where('resident_id', auth()->id())->orderByDesc('created_at')->get();
+                            @endphp
+                            @forelse($requests as $request)
+                                <tr>
+                                    <td class="px-4 py-3">{{ $request->category }}</td>
+                                    <td class="px-4 py-3">{{ $request->description }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium
+                                            @if($request->status === 'Pending') bg-yellow-100 text-yellow-800
+                                            @elseif($request->status === 'In Progress') bg-blue-100 text-blue-800
+                                            @else bg-green-100 text-green-800 @endif">
+                                            {{ $request->status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-4 py-3 text-gray-500 text-center">No service requests yet.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\VisitorController;
@@ -25,6 +26,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/resident/dashboard', [ResidentController::class, 'dashboard'])->name('resident.dashboard');
     Route::post('/resident/pre-register-visitor', [ResidentController::class, 'storePreRegisteredVisitor'])->name('resident.pre_register_visitor');
     Route::post('/resident/book-facility', [ResidentController::class, 'storeBooking'])->name('resident.book_facility');
+    Route::post('/resident/service-request', [ResidentController::class, 'storeServiceRequest'])->name('resident.store_service_request');
+
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('/admin/service-request/{id}/status', [AdminController::class, 'storeAdminRequestStatus'])->name('admin.store_service_status');
 
     Route::post('/visitor/store', [VisitorController::class, 'store'])->name('visitor.store');
 });

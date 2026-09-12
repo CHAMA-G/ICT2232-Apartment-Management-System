@@ -54,4 +54,23 @@ class ResidentController extends Controller
 
         return redirect()->back()->with('booking_success', 'Facility booked successfully!');
     }
+
+    public function storeServiceRequest(Request $request)
+    {
+        $validated = $request->validate([
+            'category' => 'required|string',
+            'description' => 'required|string',
+        ]);
+
+        DB::table('service_requests')->insert([
+            'resident_id' => auth()->id(),
+            'category' => $validated['category'],
+            'description' => $validated['description'],
+            'status' => 'Pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('service_success', 'Service request submitted successfully!');
+    }
 }
