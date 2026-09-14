@@ -6,6 +6,9 @@ use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\VisitorController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/auth/google', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'handleGoogleCallback']);
+
 Route::get('/', function () {
     return view('welcome');
 });
