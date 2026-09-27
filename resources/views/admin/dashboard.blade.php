@@ -44,6 +44,9 @@
                             <span class="ml-auto bg-sky-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{{ $visitorBadgeCount }}</span>
                         @endif
                     </a>
+                    <a href="{{ route('admin.flats') }}" data-section="flats-section" id="tab-flats" class="dashboard-tab flex items-center w-full px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition duration-200">
+                        <span class="mr-3">🏢</span> Manage Flats
+                    </a>
                     <a href="#manage-section" id="tab-manage" class="dashboard-tab flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition duration-200">
                         <span class="flex items-center"><span class="mr-3">✏️</span> Manage Records</span>
                         @php $bookingBadgeCount = $bookingsCount ?? \App\Models\Booking::where('status', 'Pending')->count(); @endphp
@@ -72,6 +75,11 @@
         <!-- 📊 2. MAIN CONTENT AREA (පළල සීමා කර මැදට සකස් කළ කොටස) -->
         <main class="w-full min-w-0 flex-1 bg-slate-100 p-8 md:ml-64">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                @if(session('status_success') || session('status_error'))
+                    <div class="mb-5 rounded-lg border px-4 py-3 text-sm font-semibold {{ session('status_error') ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
+                        {{ session('status_error') ?? session('status_success') }}
+                    </div>
+                @endif
                 
                 <div id="overview-section">
                     <!-- Dashboard Top Bar Header -->
@@ -206,7 +214,26 @@
                                             <td class="px-3 py-3"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">{{ $visitor->status }}</span></td>
                                             <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $visitor->check_in_time ? \Carbon\Carbon::parse($visitor->check_in_time)->format('Y-m-d H:i') : 'N/A' }}</td>
                                             <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $visitor->check_out_time ? \Carbon\Carbon::parse($visitor->check_out_time)->format('Y-m-d H:i') : 'N/A' }}</td>
-                                            <td class="px-3 py-3 text-right"><details class="inline-block text-left"><summary class="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white">Edit</summary><form action="{{ route('admin.update_visitor', $visitor->id) }}" method="POST" class="mt-2 w-64 space-y-2 rounded-lg border bg-white p-3 shadow-lg">@csrf @method('PATCH')<input name="visitor_name" value="{{ $visitor->visitor_name }}" required class="w-full rounded border p-2 text-xs"><input name="phone" value="{{ $visitor->phone }}" required class="w-full rounded border p-2 text-xs"><input name="vehicle_number" value="{{ $visitor->vehicle_number }}" class="w-full rounded border p-2 text-xs"><input name="flat_number" value="{{ $visitor->flat_number }}" required class="w-full rounded border p-2 text-xs"><select name="status" class="w-full rounded border p-2 text-xs"><option {{ $visitor->status === 'Pre-registered' ? 'selected' : '' }}>Pre-registered</option><option {{ $visitor->status === 'Checked-In' ? 'selected' : '' }}>Checked-In</option><option {{ $visitor->status === 'Checked-Out' ? 'selected' : '' }}>Checked-Out</option></select><button class="w-full rounded bg-blue-600 px-2 py-1 text-xs font-bold text-white">Save</button></form></details><form action="{{ route('admin.destroy_visitor', $visitor->id) }}" method="POST" class="ml-1 inline" onsubmit="return confirm('Remove this visitor?');">@csrf @method('DELETE')<button class="rounded bg-red-600 px-3 py-1.5 text-xs font-bold text-white">Remove</button></form></td>
+                                            <td class="px-3 py-3 text-right">
+                                                <details class="inline-block text-left">
+                                                    <summary class="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white">Edit</summary>
+                                                    <form action="{{ route('admin.update_visitor', $visitor->id) }}" method="POST" class="mt-2 w-64 space-y-2 rounded-lg border bg-white p-3 shadow-lg">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input name="visitor_name" value="{{ $visitor->visitor_name }}" required class="w-full rounded border p-2 text-xs">
+                                                        <input name="phone" value="{{ $visitor->phone }}" required class="w-full rounded border p-2 text-xs">
+                                                        <input name="vehicle_number" value="{{ $visitor->vehicle_number }}" class="w-full rounded border p-2 text-xs">
+                                                        <select name="flat_number" required class="w-full rounded border p-2 text-xs">
+                                                            @foreach($flats as $flat)
+                                                                <option value="{{ $flat->flat_number }}" {{ $visitor->flat_number === $flat->flat_number ? 'selected' : '' }}>{{ $flat->flat_number }} · {{ $flat->block }} · {{ $flat->floor }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <select name="status" class="w-full rounded border p-2 text-xs"><option {{ $visitor->status === 'Pre-registered' ? 'selected' : '' }}>Pre-registered</option><option {{ $visitor->status === 'Checked-In' ? 'selected' : '' }}>Checked-In</option><option {{ $visitor->status === 'Checked-Out' ? 'selected' : '' }}>Checked-Out</option></select>
+                                                        <button class="w-full rounded bg-blue-600 px-2 py-1 text-xs font-bold text-white">Save</button>
+                                                    </form>
+                                                </details>
+                                                <form action="{{ route('admin.destroy_visitor', $visitor->id) }}" method="POST" class="ml-1 inline" onsubmit="return confirm('Remove this visitor?');">@csrf @method('DELETE')<button class="rounded bg-red-600 px-3 py-1.5 text-xs font-bold text-white">Remove</button></form>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr><td colspan="8" class="px-3 py-6 text-center text-slate-500">No visitor logs found.</td></tr>
@@ -250,12 +277,98 @@
                             <div class="mb-4 border-b pb-3"><p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Security</p><h2 class="mt-1 text-lg font-black text-gray-800">Visitors</h2></div>
                             <div class="space-y-3">
                                 @forelse($visitors as $visitor)
-                                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4"><div><p class="font-bold text-slate-800">{{ $visitor->visitor_name }}</p><p class="mt-1 text-xs text-slate-500">{{ $visitor->phone }} · Flat {{ $visitor->flat_number }} · {{ $visitor->status }}</p></div><div class="flex gap-2"><details><summary class="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white">Edit</summary><form action="{{ route('admin.update_visitor', $visitor->id) }}" method="POST" class="mt-2 w-64 space-y-2 rounded-lg border bg-white p-3 shadow-lg">@csrf @method('PATCH')<input name="visitor_name" value="{{ $visitor->visitor_name }}" required class="w-full rounded border p-2 text-xs"><input name="phone" value="{{ $visitor->phone }}" required class="w-full rounded border p-2 text-xs"><input name="vehicle_number" value="{{ $visitor->vehicle_number }}" class="w-full rounded border p-2 text-xs"><input name="flat_number" value="{{ $visitor->flat_number }}" required class="w-full rounded border p-2 text-xs"><select name="status" class="w-full rounded border p-2 text-xs"><option {{ $visitor->status === 'Pre-registered' ? 'selected' : '' }}>Pre-registered</option><option {{ $visitor->status === 'Checked-In' ? 'selected' : '' }}>Checked-In</option><option {{ $visitor->status === 'Checked-Out' ? 'selected' : '' }}>Checked-Out</option></select><button class="w-full rounded bg-blue-600 px-2 py-1 text-xs font-bold text-white">Save</button></form></details><form action="{{ route('admin.destroy_visitor', $visitor->id) }}" method="POST" onsubmit="return confirm('Remove this visitor?');">@csrf @method('DELETE')<button class="rounded bg-red-600 px-3 py-1.5 text-xs font-bold text-white">Remove</button></form></div></div>
+                                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                        <div><p class="font-bold text-slate-800">{{ $visitor->visitor_name }}</p><p class="mt-1 text-xs text-slate-500">{{ $visitor->phone }} · Flat {{ $visitor->flat_number }} · {{ $visitor->status }}</p></div>
+                                        <div class="flex gap-2">
+                                            <details>
+                                                <summary class="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white">Edit</summary>
+                                                <form action="{{ route('admin.update_visitor', $visitor->id) }}" method="POST" class="mt-2 w-64 space-y-2 rounded-lg border bg-white p-3 shadow-lg">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input name="visitor_name" value="{{ $visitor->visitor_name }}" required class="w-full rounded border p-2 text-xs">
+                                                    <input name="phone" value="{{ $visitor->phone }}" required class="w-full rounded border p-2 text-xs">
+                                                    <input name="vehicle_number" value="{{ $visitor->vehicle_number }}" class="w-full rounded border p-2 text-xs">
+                                                    <select name="flat_number" required class="w-full rounded border p-2 text-xs">
+                                                        @foreach($flats as $flat)
+                                                            <option value="{{ $flat->flat_number }}" {{ $visitor->flat_number === $flat->flat_number ? 'selected' : '' }}>{{ $flat->flat_number }} · {{ $flat->block }} · {{ $flat->floor }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <select name="status" class="w-full rounded border p-2 text-xs"><option {{ $visitor->status === 'Pre-registered' ? 'selected' : '' }}>Pre-registered</option><option {{ $visitor->status === 'Checked-In' ? 'selected' : '' }}>Checked-In</option><option {{ $visitor->status === 'Checked-Out' ? 'selected' : '' }}>Checked-Out</option></select>
+                                                    <button class="w-full rounded bg-blue-600 px-2 py-1 text-xs font-bold text-white">Save</button>
+                                                </form>
+                                            </details>
+                                            <form action="{{ route('admin.destroy_visitor', $visitor->id) }}" method="POST" onsubmit="return confirm('Remove this visitor?');">@csrf @method('DELETE')<button class="rounded bg-red-600 px-3 py-1.5 text-xs font-bold text-white">Remove</button></form>
+                                        </div>
+                                    </div>
                                 @empty
                                     <p class="text-sm text-slate-500">No visitors found.</p>
                                 @endforelse
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div id="flats-section" class="hidden">
+                    <div class="mb-8 border-b border-slate-200 pb-4">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Administration</p>
+                        <h1 class="mt-0.5 text-2xl font-black tracking-tight text-slate-800">Manage Flats</h1>
+                    </div>
+
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                            <h2 class="mb-5 border-b border-slate-100 pb-3 text-lg font-black text-slate-800">Add a flat</h2>
+                            <form action="{{ route('admin.flats.store') }}" method="POST" class="space-y-4">
+                                @csrf
+                                <div>
+                                    <label for="flat_number" class="mb-1 block text-sm font-semibold text-slate-700">Flat Number</label>
+                                    <input id="flat_number" name="flat_number" value="{{ old('flat_number') }}" required maxlength="50" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    @error('flat_number')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="block" class="mb-1 block text-sm font-semibold text-slate-700">Block</label>
+                                    <input id="block" name="block" value="{{ old('block') }}" required maxlength="50" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    @error('block')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="floor" class="mb-1 block text-sm font-semibold text-slate-700">Floor</label>
+                                    <input id="floor" name="floor" value="{{ old('floor') }}" required maxlength="50" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    @error('floor')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700">Save Flat</button>
+                            </form>
+                        </section>
+
+                        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-100 px-6 py-5">
+                                <h2 class="text-lg font-black text-slate-800">Existing flats</h2>
+                                <p class="mt-1 text-sm text-slate-500">{{ $flats->count() }} registered</p>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                                    <thead class="bg-slate-50 text-left font-bold text-slate-600">
+                                        <tr><th class="px-4 py-3">Flat</th><th class="px-4 py-3">Block</th><th class="px-4 py-3">Floor</th><th class="px-4 py-3 text-right">Action</th></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        @forelse($flats as $flat)
+                                            <tr>
+                                                <td class="px-4 py-3 font-semibold text-slate-800">{{ $flat->flat_number }}</td>
+                                                <td class="px-4 py-3 text-slate-600">{{ $flat->block }}</td>
+                                                <td class="px-4 py-3 text-slate-600">{{ $flat->floor }}</td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <form action="{{ route('admin.flats.destroy', $flat->id) }}" method="POST" onsubmit="return confirm('Delete flat {{ $flat->flat_number }}?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="rounded bg-red-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-red-700">Delete</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No flats have been added.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
                     </div>
                 </div>
 
@@ -266,13 +379,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.dashboard-tab');
-            const sections = document.querySelectorAll('#overview-section, #requests-section, #visitors-section, #manage-section');
+            const sections = document.querySelectorAll('#overview-section, #requests-section, #visitors-section, #manage-section, #flats-section');
 
             tabs.forEach(function (tab) {
                 tab.addEventListener('click', function (event) {
                     event.preventDefault();
 
-                    const targetId = tab.getAttribute('href').substring(1);
+                    const targetId = tab.dataset.section || tab.getAttribute('href').substring(1);
+                    if (tab.dataset.section) {
+                        window.history.replaceState({}, '', tab.href);
+                    }
 
                     sections.forEach(function (section) {
                         section.classList.add('hidden');
@@ -292,6 +408,14 @@
                     tab.classList.remove('text-slate-300');
                 });
             });
+
+            const initialSection = @json($activeSection ?? 'overview-section');
+            const initialTab = Array.from(tabs).find(function (tab) {
+                return (tab.dataset.section || tab.getAttribute('href').substring(1)) === initialSection;
+            });
+            if (initialTab) {
+                initialTab.click();
+            }
         });
     </script>
 

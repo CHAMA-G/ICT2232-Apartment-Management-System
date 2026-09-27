@@ -78,9 +78,9 @@
                                 <label class="block text-sm font-medium text-gray-500">Flat to Visit</label>
                                 <select name="flat_number" required class="mt-1 block w-full rounded-lg border-gray-200 p-2.5 bg-white border text-gray-500 outline-none">
                                     <option value="">-- Select Flat --</option>
-                                    <option value="A-102">A-102</option>
-                                    <option value="B-205">B-205</option>
-                                    <option value="C-301">C-301</option>
+                                    @foreach($flats as $flat)
+                                        <option value="{{ $flat->flat_number }}">{{ $flat->flat_number }} · Block {{ $flat->block }} · Floor {{ $flat->floor }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="pt-2">
@@ -133,15 +133,7 @@
                                             </tr>
                                             @endforeach
                                         @else
-                                            <tr>
-                                                <td class="px-2 py-4 font-bold text-slate-700">Saman Kumara</td>
-                                                <td class="px-2 py-4">B-205</td>
-                                                <td class="px-2 py-4 text-right">
-                                                    <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg text-xs shadow-sm transition">
-                                                        Check-In
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            <tr><td colspan="3" class="px-2 py-6 text-center text-slate-500">No pre-registered visitors found.</td></tr>
                                         @endif
                                     </tbody>
                                 </table>
@@ -184,17 +176,7 @@
                                     </tr>
                                     @endforeach
                                 @else
-                                    <tr>
-                                        <td class="px-4 py-4 font-bold text-slate-700">Kamal Perera</td>
-                                        <td class="px-4 py-4">A-102</td>
-                                        <td class="px-4 py-4 text-slate-700">WP CAS-1234</td>
-                                        <td class="px-4 py-4 text-gray-400">2026-09-12 19:24:20</td>
-                                        <td class="px-4 py-4 text-right">
-                                            <button type="button" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-1.5 rounded-lg text-xs shadow-sm transition">
-                                                Check-Out
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    <tr><td colspan="5" class="px-4 py-6 text-center text-slate-500">No visitors are currently checked in.</td></tr>
                                 @endif
                             </tbody>
                         </table>

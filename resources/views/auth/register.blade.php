@@ -26,6 +26,19 @@
                 </div>
 
                 <div>
+                    <label for="flat_number" class="block text-xs font-semibold text-slate-400 tracking-wider">FLAT</label>
+                    <select id="flat_number" name="flat_number" required class="w-full mt-1.5 px-4 py-3 bg-slate-950 border border-slate-700 text-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <option value="">Select your flat</option>
+                        @foreach($flats as $flat)
+                            <option value="{{ $flat->flat_number }}" {{ old('flat_number') === $flat->flat_number ? 'selected' : '' }}>{{ $flat->flat_number }} · Block {{ $flat->block }} · Floor {{ $flat->floor }}</option>
+                        @endforeach
+                    </select>
+                    @error('flat_number')
+                        <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label for="email" class="block text-xs font-semibold text-slate-400 tracking-wider">EMAIL</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" class="w-full mt-1.5 px-4 py-3 bg-slate-950 border border-slate-700 text-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all duration-300 focus:scale-[1.01] focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-inner">
                     @error('email')

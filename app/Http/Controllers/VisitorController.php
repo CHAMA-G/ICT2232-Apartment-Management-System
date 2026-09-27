@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Flat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,7 +26,9 @@ class VisitorController extends Controller
             ->orderByDesc('check_in_time')
             ->get();
 
-        return view('security.dashboard', compact('activeVisitors', 'preRegisteredVisitors', 'search'));
+        $flats = Flat::orderBy('block')->orderBy('floor')->orderBy('flat_number')->get();
+
+        return view('security.dashboard', compact('activeVisitors', 'preRegisteredVisitors', 'search', 'flats'));
     }
 
     public function store(Request $request)
@@ -33,7 +36,7 @@ class VisitorController extends Controller
         $request->validate([
             'visitor_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'flat_number' => 'required|string|max:50',
+            'flat_number' => 'required|string|exists:flats,flat_number',
             'vehicle_number' => 'nullable|string|max:50',
         ]);
 

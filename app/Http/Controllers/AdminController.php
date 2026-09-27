@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Flat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -43,7 +44,53 @@ class AdminController extends Controller
             ->orderByDesc('bookings.booking_date')
             ->get();
 
-        return view('admin.dashboard', compact('todayVisitors', 'activeBookings', 'pendingRequests', 'pendingRequestsCount', 'serviceRequests', 'visitors', 'visitorsCount', 'bookings', 'bookingsCount'));
+        $flats = Flat::orderBy('block')->orderBy('floor')->orderBy('flat_number')->get();
+        $activeSection = request()->routeIs('admin.flats') ? 'flats-section' : 'overview-section';
+
+        return view('admin.dashboard', compact('todayVisitors', 'activeBookings', 'pendingRequests', 'pendingRequestsCount', 'serviceRequests', 'visitors', 'visitorsCount', 'bookings', 'bookingsCount', 'flats', 'activeSection'));
+    }
+
+    public function manageFlats()
+    {
+        $this->ensureAdministrator();
+
+        return $this->dashboard();
+    }
+
+    public function storeFlat(Request $request)
+    {
+        $this->ensureAdministrator();
+
+        $validated = $request->validate([
+            'flat_number' => 'required|string|max:50|unique:flats,flat_number',
+            'block' => 'required|string|max:50',
+            'floor' => 'required|string|max:50',
+        ]);
+
+        Flat::create($validated);
+
+        return redirect()->route('admin.flats')->with('status_success', 'Flat added successfully.');
+    }
+
+    public function destroyFlat($id)
+    {
+        $this->ensureAdministrator();
+
+        $flat = Flat::findOrFail($id);
+
+        if (DB::table('users')->where('flat_number', $flat->flat_number)->exists()
+            || DB::table('visitors')->where('flat_number', $flat->flat_number)->exists()) {
+            return redirect()->route('admin.flats')->with('status_error', 'This flat is assigned to residents or visitor records and cannot be deleted.');
+        }
+
+        $flat->delete();
+
+        return redirect()->route('admin.flats')->with('status_success', 'Flat deleted successfully.');
+    }
+
+    private function ensureAdministrator(): void
+    {
+        abort_unless(auth()->check() && auth()->user()->role === 'admin', 403);
     }
 
     public function storeAdminRequestStatus(Request $request, $id)
@@ -68,7 +115,7 @@ class AdminController extends Controller
             'visitor_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'vehicle_number' => 'nullable|string|max:50',
-            'flat_number' => 'required|string|max:50',
+            'flat_number' => 'required|string|exists:flats,flat_number',
             'status' => 'required|string|in:Pre-registered,Checked-In,Checked-Out',
         ]);
 

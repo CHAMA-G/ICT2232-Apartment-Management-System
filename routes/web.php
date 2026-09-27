@@ -42,6 +42,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/resident/service-requests/{id}', [ResidentController::class, 'destroyServiceRequest'])->name('resident.destroy_service_request');
 
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/flats', [AdminController::class, 'manageFlats'])->name('admin.flats');
+    Route::post('/admin/flats', [AdminController::class, 'storeFlat'])->name('admin.flats.store');
+    Route::delete('/admin/flats/{id}', [AdminController::class, 'destroyFlat'])->name('admin.flats.destroy');
     Route::post('/admin/service-request/{id}/status', [AdminController::class, 'storeAdminRequestStatus'])->name('admin.store_service_status');
     Route::patch('/admin/visitors/{id}', [AdminController::class, 'updateVisitor'])->name('admin.update_visitor');
     Route::delete('/admin/visitors/{id}', [AdminController::class, 'destroyVisitor'])->name('admin.destroy_visitor');

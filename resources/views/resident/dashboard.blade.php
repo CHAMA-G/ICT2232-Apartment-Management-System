@@ -63,9 +63,10 @@
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Resident Services</p>
                         <h1 class="mt-0.5 text-2xl font-black tracking-tight text-slate-800">Resident Dashboard</h1>
                     </div>
-                    <div class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-right shadow-sm">
+                                        <div class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-right shadow-sm">
                         <p class="text-sm font-bold text-gray-800">{{ auth()->user()->name }}</p>
                         <p class="text-xs text-gray-500">Apartment resident</p>
+                        <div class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 shadow-sm whitespace-nowrap mt-1 inline-block">📍 Flat: {{ auth()->user()->assigned_flat ?? 'A-102' }}</div>
                     </div>
                 </div>
 
