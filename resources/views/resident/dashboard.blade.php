@@ -63,10 +63,15 @@
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Resident Services</p>
                         <h1 class="mt-0.5 text-2xl font-black tracking-tight text-slate-800">Resident Dashboard</h1>
                     </div>
-                                        <div class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-right shadow-sm">
-                        <p class="text-sm font-bold text-gray-800">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-gray-500">Apartment resident</p>
-                        <div class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 shadow-sm whitespace-nowrap mt-1 inline-block">📍 Flat: {{ auth()->user()->assigned_flat ?? 'A-102' }}</div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm flex items-center space-x-3 border border-gray-100 max-w-xs ml-auto">
+                        <div class="text-left">
+                            <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Assigned Flat</span>
+                            <span class="block text-[15px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 mt-0.5">📍 {{ auth()->user()->assigned_flat ?? 'A-102' }}</span>
+                        </div>
+                        <div class="text-left border-l pl-3 border-gray-100">
+                            <span class="block font-black text-slate-800 text-[15px] tracking-tight leading-none">{{ auth()->user()->name }}</span>
+                            <span class="block text-[10px] text-slate-400 font-medium uppercase tracking-wide mt-1.5">Resident Portal</span>
+                        </div>
                     </div>
                 </div>
 

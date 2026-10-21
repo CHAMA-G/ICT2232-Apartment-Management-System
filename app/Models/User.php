@@ -21,6 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'google_id',
         'password',
         'flat_number',
@@ -47,5 +48,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getAssignedFlatAttribute()
+    {
+        return $this->attributes['flat_number'] ?? null;
     }
 }

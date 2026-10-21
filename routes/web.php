@@ -42,6 +42,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/resident/service-requests/{id}', [ResidentController::class, 'destroyServiceRequest'])->name('resident.destroy_service_request');
 
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/residents', [AdminController::class, 'residents'])->name('admin.residents');
+    Route::get('/admin/security', [AdminController::class, 'manageSecurity'])->name('admin.security');
+    Route::post('/admin/security', [AdminController::class, 'storeSecurity'])->name('admin.security.store');
+    Route::delete('/admin/security/{id}', [AdminController::class, 'destroySecurity'])->name('admin.security.destroy');
     Route::get('/admin/flats', [AdminController::class, 'manageFlats'])->name('admin.flats');
     Route::post('/admin/flats', [AdminController::class, 'storeFlat'])->name('admin.flats.store');
     Route::delete('/admin/flats/{id}', [AdminController::class, 'destroyFlat'])->name('admin.flats.destroy');
@@ -57,5 +61,3 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
-
-

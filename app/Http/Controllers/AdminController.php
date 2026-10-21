@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Flat;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
+        $this->ensureAdministrator();
+
         $todayVisitors = DB::table('visitors')
             ->whereDate('created_at', today())
             ->count();
@@ -30,7 +35,7 @@ class AdminController extends Controller
 
         $serviceRequests = DB::table('service_requests')
             ->join('users', 'users.id', '=', 'service_requests.resident_id')
-            ->select('service_requests.*', 'users.name as resident_name')
+            ->select('service_requests.*', 'users.name as resident_name', 'users.flat_number as resident_flat')
             ->orderByDesc('service_requests.created_at')
             ->get();
 
@@ -45,9 +50,63 @@ class AdminController extends Controller
             ->get();
 
         $flats = Flat::orderBy('block')->orderBy('floor')->orderBy('flat_number')->get();
-        $activeSection = request()->routeIs('admin.flats') ? 'flats-section' : 'overview-section';
+        $residents = User::where('role', 'resident')->orderBy('name')->get();
+        $securityGuards = User::where('role', 'security')->orderBy('name')->get();
+        $activeSection = match (true) {
+            request()->routeIs('admin.flats') => 'flats-section',
+            request()->routeIs('admin.residents') => 'residents-section',
+            request()->routeIs('admin.security') => 'security-section',
+            default => 'overview-section',
+        };
 
-        return view('admin.dashboard', compact('todayVisitors', 'activeBookings', 'pendingRequests', 'pendingRequestsCount', 'serviceRequests', 'visitors', 'visitorsCount', 'bookings', 'bookingsCount', 'flats', 'activeSection'));
+        return view('admin.dashboard', compact('todayVisitors', 'activeBookings', 'pendingRequests', 'pendingRequestsCount', 'serviceRequests', 'visitors', 'visitorsCount', 'bookings', 'bookingsCount', 'flats', 'residents', 'securityGuards', 'activeSection'));
+    }
+
+    public function manageSecurity()
+    {
+        $this->ensureAdministrator();
+
+        return $this->dashboard();
+    }
+
+    public function storeSecurity(Request $request)
+    {
+        $this->ensureAdministrator();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['required', 'string', 'max:20'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $securityGuard = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'password' => Hash::make($validated['password']),
+        ]);
+        $securityGuard->role = 'security';
+        $securityGuard->save();
+
+        return redirect()->route('admin.security')->with('status_success', 'Security guard account created successfully.');
+    }
+
+    public function destroySecurity($id)
+    {
+        $this->ensureAdministrator();
+
+        $securityGuard = User::where('role', 'security')->findOrFail($id);
+        $securityGuard->delete();
+
+        return redirect()->route('admin.security')->with('status_success', 'Security guard account deleted successfully.');
+    }
+
+    public function residents()
+    {
+        $this->ensureAdministrator();
+
+        return $this->dashboard();
     }
 
     public function manageFlats()

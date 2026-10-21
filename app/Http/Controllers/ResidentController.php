@@ -36,18 +36,20 @@ class ResidentController extends Controller
 
     public function storePreRegisteredVisitor(Request $request)
     {
-        $validated = $request->validate([
+        $validatedData = $request->validate([
             'visitor_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'expected_date' => 'required|date',
         ]);
 
+        $validatedData['flat_number'] = auth()->user()->assigned_flat;
+
         DB::table('visitors')->insert([
-            'visitor_name' => $validated['visitor_name'],
-            'phone' => $validated['phone'],
-            'flat_number' => auth()->user()->flat_number ?? 'N/A',
+            'visitor_name' => $validatedData['visitor_name'],
+            'phone' => $validatedData['phone'],
+            'flat_number' => $validatedData['flat_number'],
             'resident_id' => auth()->id(),
-            'expected_date' => $validated['expected_date'],
+            'expected_date' => $validatedData['expected_date'],
             'vehicle_number' => $request->vehicle_number ?? null,
             'status' => 'Pre-registered',
             'check_in_time' => null,

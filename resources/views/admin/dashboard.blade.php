@@ -47,6 +47,14 @@
                     <a href="{{ route('admin.flats') }}" data-section="flats-section" id="tab-flats" class="dashboard-tab flex items-center w-full px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition duration-200">
                         <span class="mr-3">🏢</span> Manage Flats
                     </a>
+                    <a href="{{ route('admin.residents') }}" data-section="residents-section" id="tab-residents" class="dashboard-tab flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition duration-200">
+                        <span class="flex items-center"><span class="mr-3">🏠</span> Residents</span>
+                        <span class="ml-auto rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">{{ $residents->count() }}</span>
+                    </a>
+                    <a href="{{ route('admin.security') }}" data-section="security-section" id="tab-security" class="dashboard-tab flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition duration-200">
+                        <span class="flex items-center"><span class="mr-3">🛡️</span> Manage Security</span>
+                        <span class="ml-auto rounded-full bg-violet-600 px-2 py-0.5 text-[10px] font-bold text-white">{{ $securityGuards->count() }}</span>
+                    </a>
                     <a href="#manage-section" id="tab-manage" class="dashboard-tab flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition duration-200">
                         <span class="flex items-center"><span class="mr-3">✏️</span> Manage Records</span>
                         @php $bookingBadgeCount = $bookingsCount ?? \App\Models\Booking::where('status', 'Pending')->count(); @endphp
@@ -144,30 +152,34 @@
                             <thead class="bg-slate-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left font-bold text-slate-600">Resident</th>
+                                    <th class="px-4 py-3">Flat</th>
                                     <th class="px-4 py-3 text-left font-bold text-slate-600">Category</th>
                                     <th class="px-4 py-3 text-left font-bold text-slate-600">Description</th>
                                     <th class="px-4 py-3 text-left font-bold text-slate-600">Status</th>
-                                    <th class="px-4 py-3 text-right font-bold text-slate-600">Action</th>
+                                    <th class="px-4 py-3 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($serviceRequests as $request)
                                     <tr>
                                         <td class="px-4 py-3 text-slate-700">{{ $request->resident_name }}</td>
+                                        <td class="px-4 py-4 font-bold text-slate-700">📍 {{ $request->resident_flat ?? 'N/A' }}</td>
                                         <td class="px-4 py-3 text-slate-700">{{ $request->category }}</td>
                                         <td class="px-4 py-3 text-slate-600">{{ $request->description }}</td>
                                         <td class="px-4 py-3">
                                             <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">{{ $request->status }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-right">
-                                            <form action="{{ route('admin.store_service_status', $request->id) }}" method="POST" class="flex items-center justify-end gap-2">
+                                        <td class="px-4 py-3 text-center">
+                                            <form action="{{ route('admin.store_service_status', $request->id) }}" method="POST">
                                                 @csrf
-                                                <select name="status" class="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                                                    <option value="Pending" {{ $request->status === 'Pending' ? 'selected' : '' }}>Pending</option>
-                                                    <option value="In Progress" {{ $request->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                                                    <option value="Resolved" {{ $request->status === 'Resolved' ? 'selected' : '' }}>Resolved</option>
-                                                </select>
-                                                <button type="submit" class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-indigo-700">Update</button>
+                                                <div class="flex items-center justify-center space-x-2 w-full">
+                                                    <select name="status" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 min-w-[140px] h-9 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                                        <option value="Pending" {{ $request->status === 'Pending' ? 'selected' : '' }}>Pending</option>
+                                                        <option value="In Progress" {{ $request->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
+                                                        <option value="Resolved" {{ $request->status === 'Resolved' ? 'selected' : '' }}>Resolved</option>
+                                                    </select>
+                                                    <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white h-9 shrink-0 transition hover:bg-indigo-700">Update</button>
+                                                </div>
                                             </form>
                                         </td>
                                     </tr>
@@ -372,6 +384,124 @@
                     </div>
                 </div>
 
+                <div id="residents-section" class="hidden">
+                    <div class="mb-8 border-b border-slate-200 pb-4">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Administration</p>
+                        <h1 class="mt-0.5 text-2xl font-black tracking-tight text-slate-800">Registered Residents</h1>
+                        <p class="mt-1 text-sm text-slate-500">{{ $residents->count() }} resident{{ $residents->count() === 1 ? '' : 's' }} registered</p>
+                    </div>
+
+                    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                                <thead class="bg-slate-50 text-left font-bold text-slate-600">
+                                    <tr>
+                                        <th class="px-4 py-3">Name</th>
+                                        <th class="px-4 py-3">Email</th>
+                                        <th class="px-4 py-3">Flat</th>
+                                        <th class="px-4 py-3">Registered</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    @forelse($residents as $resident)
+                                        <tr>
+                                            <td class="px-4 py-3 font-semibold text-slate-800">{{ $resident->name }}</td>
+                                            <td class="px-4 py-3 text-slate-600">{{ $resident->email }}</td>
+                                            <td class="px-4 py-3 text-slate-600">{{ $resident->flat_number ?: 'Not assigned' }}</td>
+                                            <td class="px-4 py-3 text-slate-600">{{ $resident->created_at?->format('M j, Y') ?? '—' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No residents have registered yet.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <div id="security-section" class="hidden">
+                    <div class="mb-8 border-b border-slate-200 pb-4">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Administration</p>
+                        <h1 class="mt-0.5 text-2xl font-black tracking-tight text-slate-800">Manage Security Guards</h1>
+                        <p class="mt-1 text-sm text-slate-500">Create and manage accounts for your gate security team.</p>
+                    </div>
+
+                    <div class="grid gap-6 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.6fr)]">
+                        <section class="h-fit rounded-xl border border-slate-700 bg-slate-900 p-6 text-white shadow-sm">
+                            <h2 class="text-lg font-black">Add a security guard</h2>
+                            <p class="mt-1 text-sm text-slate-400">Create a secure sign-in for a new team member.</p>
+                            <form action="{{ route('admin.security.store') }}" method="POST" class="mt-6 space-y-4">
+                                @csrf
+                                <div>
+                                    <label for="security-name" class="mb-1 block text-sm font-semibold text-slate-200">Full Name</label>
+                                    <input id="security-name" name="name" value="{{ old('name') }}" required maxlength="255" autocomplete="name" class="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-900">
+                                    @error('name')<p class="mt-1 text-sm text-rose-300">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="security-email" class="mb-1 block text-sm font-semibold text-slate-200">Email</label>
+                                    <input id="security-email" type="email" name="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email" class="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-900">
+                                    @error('email')<p class="mt-1 text-sm text-rose-300">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="security-phone" class="mb-1 block text-sm font-semibold text-slate-200">Contact Number</label>
+                                    <input id="security-phone" type="tel" name="phone" value="{{ old('phone') }}" required maxlength="20" autocomplete="tel" class="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-900">
+                                    @error('phone')<p class="mt-1 text-sm text-rose-300">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="security-password" class="mb-1 block text-sm font-semibold text-slate-200">Password</label>
+                                    <input id="security-password" type="password" name="password" required autocomplete="new-password" class="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-900">
+                                    @error('password')<p class="mt-1 text-sm text-rose-300">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="security-password-confirmation" class="mb-1 block text-sm font-semibold text-slate-200">Confirm Password</label>
+                                    <input id="security-password-confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-900">
+                                </div>
+                                <button type="submit" class="w-full rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-400">Create Security Account</button>
+                            </form>
+                        </section>
+
+                        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-100 px-6 py-5">
+                                <h2 class="text-lg font-black text-slate-800">Active security accounts</h2>
+                                <p class="mt-1 text-sm text-slate-500">{{ $securityGuards->count() }} guard{{ $securityGuards->count() === 1 ? '' : 's' }} registered</p>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                                    <thead class="bg-slate-50 text-left font-bold text-slate-600">
+                                        <tr>
+                                            <th class="px-4 py-3">Guard</th>
+                                            <th class="px-4 py-3">Contact</th>
+                                            <th class="px-4 py-3">Created</th>
+                                            <th class="px-4 py-3 text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        @forelse($securityGuards as $securityGuard)
+                                            <tr>
+                                                <td class="px-4 py-3">
+                                                    <p class="font-semibold text-slate-800">{{ $securityGuard->name }}</p>
+                                                    <p class="mt-0.5 text-xs text-slate-500">{{ $securityGuard->email }}</p>
+                                                </td>
+                                                <td class="px-4 py-3 text-slate-600">{{ $securityGuard->phone ?: '—' }}</td>
+                                                <td class="px-4 py-3 text-slate-600">{{ $securityGuard->created_at?->format('M j, Y') ?? '—' }}</td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <form action="{{ route('admin.security.destroy', $securityGuard->id) }}" method="POST" onsubmit="return confirm('Delete the security account for {{ addslashes($securityGuard->name) }}?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="rounded-lg bg-rose-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-rose-700">Delete Account</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="4" class="px-4 py-10 text-center text-slate-500">No security guards have been added yet.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
@@ -379,7 +509,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.dashboard-tab');
-            const sections = document.querySelectorAll('#overview-section, #requests-section, #visitors-section, #manage-section, #flats-section');
+            const sections = document.querySelectorAll('#overview-section, #requests-section, #visitors-section, #manage-section, #flats-section, #residents-section, #security-section');
 
             tabs.forEach(function (tab) {
                 tab.addEventListener('click', function (event) {
