@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Bootstrap\RegisterProviders;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Filesystem\FilesystemServiceProvider;
-use Illuminate\View\ViewServiceProvider;
+use Illuminate\Support\ServiceProvider;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,7 +19,22 @@ $app = Application::configure(basePath: dirname(__DIR__))
         //
     })->create();
 
-$app->register(FilesystemServiceProvider::class);
-$app->register(ViewServiceProvider::class);
+$app->beforeBootstrapping(RegisterProviders::class, static function (Application $app): void {
+    $config = $app->make('config');
+    $providers = $config->get('app.providers', []);
+
+    if ($providers === null) {
+        $providers = [];
+    }
+
+    if (!is_array($providers)) {
+        throw new \UnexpectedValueException('The app.providers configuration must be an array.');
+    }
+
+    $config->set('app.providers', array_values(array_unique(array_merge(
+        ServiceProvider::defaultProviders()->toArray(),
+        $providers,
+    ))));
+});
 
 return $app;
