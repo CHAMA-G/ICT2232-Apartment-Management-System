@@ -3,8 +3,10 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\View\ViewServiceProvider;
 
 return Application::configure(basePath: dirname(__DIR__))
+    ->withProviders([ViewServiceProvider::class], withBootstrapProviders: false)
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
