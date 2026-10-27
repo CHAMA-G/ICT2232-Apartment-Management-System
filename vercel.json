@@ -12,6 +12,8 @@
     ],
     "env": {
         "LARAVEL_STORAGE_PATH": "/tmp",
+        "APP_CONFIG_CACHE": "/tmp/laravel-config-cache-v2.php",
+        "APP_SERVICES_CACHE": "/tmp/laravel-services-cache-v2.php",
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_STORE": "array",
         "SESSION_DRIVER": "array",
