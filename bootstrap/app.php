@@ -31,9 +31,19 @@ $app->beforeBootstrapping(RegisterProviders::class, static function (Application
         throw new \UnexpectedValueException('The app.providers configuration must be an array.');
     }
 
+    $bootstrapProvidersPath = $app->getBootstrapProvidersPath();
+    $bootstrapProviders = is_file($bootstrapProvidersPath)
+        ? require $bootstrapProvidersPath
+        : [];
+
+    if (!is_array($bootstrapProviders)) {
+        throw new \UnexpectedValueException('The bootstrap providers file must return an array.');
+    }
+
     $config->set('app.providers', array_values(array_unique(array_merge(
         ServiceProvider::defaultProviders()->toArray(),
         $providers,
+        $bootstrapProviders,
     ))));
 });
 
