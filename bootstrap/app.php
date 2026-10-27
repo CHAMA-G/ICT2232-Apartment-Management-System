@@ -19,9 +19,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })->create();
 
 $app->register(ViewServiceProvider::class);
-
-if (!$app->bound('view.finder')) {
-    (new ViewServiceProvider($app))->register();
-}
+(new ViewServiceProvider($app))->register();
 
 return $app;
