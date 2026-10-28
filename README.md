@@ -31,25 +31,6 @@ If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Lar
 
 We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-## Gmail registration verification
-
-Resident registration accepts `@gmail.com` addresses and requires a six-digit email code before an account is created. Codes expire after 10 minutes, allow five verification attempts, and can be requested at most five times per hour per address.
-
-Configure Gmail SMTP in the deployment environment:
-
-```dotenv
-MAIL_MAILER=smtp
-MAIL_SCHEME=tls
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-sender@gmail.com
-MAIL_PASSWORD=your-google-app-password
-MAIL_FROM_ADDRESS=your-sender@gmail.com
-MAIL_FROM_NAME="Apartment Management System"
-```
-
-Create a Google App Password for the sending Gmail account (Google requires 2-Step Verification). Add these values to Vercel's Production environment variables; never commit the App Password or share it in chat. After deploying, run `php artisan migrate --force` once against the production database to create the verification-code table.
-
 ### Premium Partners
 
 - **[Vehikl](https://vehikl.com)**
