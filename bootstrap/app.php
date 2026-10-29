@@ -17,7 +17,17 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
-            return redirect()->back()->withInput($request->except('password', '_token'))->with('error', 'Session expired or multiple accounts were used in another tab. Please try again.');
+            if (\Illuminate\Support\Facades\Auth::check()) {
+                $user = \Illuminate\Support\Facades\Auth::user();
+                return match ($user->role) {
+                    'admin' => redirect()->route('admin.dashboard'),
+                    'security' => redirect()->route('security.dashboard'),
+                    'resident' => redirect()->route('resident.dashboard'),
+                    default => redirect()->route('dashboard'),
+                };
+            }
+
+            return redirect()->route('login')->with('status', 'Your session expired. Please log in again.');
         });
     })->create();
 

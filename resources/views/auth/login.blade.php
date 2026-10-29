@@ -67,5 +67,13 @@
                 <p class="text-center text-sm text-slate-400">New resident? <a href="{{ route('register') }}" class="text-sky-300 hover:text-sky-200">Create an account</a></p>
             @endif
         </div>
+
+        <script>
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
+        </script>
     </body>
 </html>

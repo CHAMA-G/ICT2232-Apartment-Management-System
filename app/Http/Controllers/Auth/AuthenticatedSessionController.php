@@ -18,9 +18,23 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create()
     {
-        return view('auth.login');
+        if (Auth::check()) {
+            $user = Auth::user();
+            return match ($user->role) {
+                'admin' => redirect()->route('admin.dashboard'),
+                'security' => redirect()->route('security.dashboard'),
+                'resident' => redirect()->route('resident.dashboard'),
+                default => redirect()->route('dashboard'),
+            };
+        }
+
+        return response()
+            ->view('auth.login')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
     }
 
     public function redirectToGoogle(): RedirectResponse
