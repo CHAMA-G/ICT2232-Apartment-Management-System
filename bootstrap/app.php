@@ -32,6 +32,22 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
             return redirect()->route('login')->with('status', 'Your session expired. Please log in again.');
         });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
+            if ($e->getStatusCode() === 403) {
+                if (\Illuminate\Support\Facades\Auth::check()) {
+                    $user = \Illuminate\Support\Facades\Auth::user();
+                    $targetRoute = match ($user->role) {
+                        'resident' => 'resident.dashboard',
+                        'security' => 'security.dashboard',
+                        default => 'dashboard',
+                    };
+                    return redirect()->route($targetRoute)->with('status_error', 'Administrator access required. You are currently logged in as ' . $user->name . ' (' . $user->role . '). Please log in with an Admin account.');
+                }
+
+                return redirect()->route('login')->with('status_error', 'Please log in with an Administrator account.');
+            }
+        });
     })->create();
 
 $app->beforeBootstrapping(RegisterProviders::class, static function (Application $app): void {
