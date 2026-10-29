@@ -25,6 +25,27 @@ class DatabaseSeeder extends Seeder
             User::factory()->create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
+                'role' => 'resident',
+            ]);
+        }
+
+        if (! User::where('email', 'admin@example.com')->exists()) {
+            User::create([
+                'name' => 'Admin User',
+                'email' => 'admin@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]);
+        }
+
+        if (! User::where('email', 'security@example.com')->exists()) {
+            User::create([
+                'name' => 'Security Guard',
+                'email' => 'security@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'security',
+                'email_verified_at' => now(),
             ]);
         }
 

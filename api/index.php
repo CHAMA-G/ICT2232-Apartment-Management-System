@@ -1,19 +1,25 @@
 <?php
 
-$dbPath = '/tmp/database.sqlite';
+$connection = getenv('DB_CONNECTION') ?: 'sqlite';
+$hasExternalHost = !empty(getenv('DB_HOST')) && getenv('DB_HOST') !== '127.0.0.1';
 
-if (! file_exists($dbPath)) {
-    touch($dbPath);
+// When running with SQLite on Vercel serverless, copy pre-seeded SQLite database to writable /tmp
+if ($connection === 'sqlite' && !$hasExternalHost) {
+    $dbPath = '/tmp/database.sqlite';
+    $seedPath = __DIR__ . '/../database/seed.sqlite';
+
+    if (!file_exists($dbPath)) {
+        if (file_exists($seedPath)) {
+            copy($seedPath, $dbPath);
+        } else {
+            touch($dbPath);
+        }
+    }
+
+    putenv('DB_CONNECTION=sqlite');
+    putenv('DB_DATABASE=' . $dbPath);
+    $_ENV['DB_CONNECTION'] = 'sqlite';
+    $_ENV['DB_DATABASE'] = $dbPath;
 }
 
-putenv('DB_CONNECTION=sqlite');
-putenv('DB_DATABASE='.$dbPath);
-$_ENV['DB_CONNECTION'] = 'sqlite';
-$_ENV['DB_DATABASE'] = $dbPath;
-
-$app = require __DIR__.'/../bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-$kernel->bootstrap();
-Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-
-require __DIR__.'/../public/index.php';
+require __DIR__ . '/../public/index.php';
