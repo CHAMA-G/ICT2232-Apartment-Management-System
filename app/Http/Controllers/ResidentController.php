@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ResidentController extends Controller
 {
@@ -11,25 +12,21 @@ class ResidentController extends Controller
     {
         $residentId = auth()->id();
 
-        $bookings = DB::table('bookings')
-            ->where('resident_id', $residentId)
-            ->orderByDesc('booking_date')
-            ->orderByDesc('created_at')
-            ->get();
+        $bookings = Schema::hasTable('bookings')
+            ? DB::table('bookings')->where('resident_id', $residentId)->orderByDesc('booking_date')->orderByDesc('created_at')->get()
+            : collect();
 
-        $serviceRequests = DB::table('service_requests')
-            ->where('resident_id', $residentId)
-            ->orderByDesc('created_at')
-            ->get();
+        $serviceRequests = Schema::hasTable('service_requests')
+            ? DB::table('service_requests')->where('resident_id', $residentId)->orderByDesc('created_at')->get()
+            : collect();
 
-        $visitorCount = DB::table('visitors')
-            ->where('resident_id', $residentId)
-            ->count();
+        $visitorCount = Schema::hasTable('visitors')
+            ? DB::table('visitors')->where('resident_id', $residentId)->count()
+            : 0;
 
-        $visitors = DB::table('visitors')
-            ->where('resident_id', $residentId)
-            ->orderByDesc('created_at')
-            ->get();
+        $visitors = Schema::hasTable('visitors')
+            ? DB::table('visitors')->where('resident_id', $residentId)->orderByDesc('created_at')->get()
+            : collect();
 
         return view('resident.dashboard', compact('bookings', 'serviceRequests', 'visitorCount', 'visitors'));
     }

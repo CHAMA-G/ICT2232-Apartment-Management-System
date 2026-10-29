@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Flat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class VisitorController extends Controller
 {
@@ -12,21 +13,19 @@ class VisitorController extends Controller
     {
         $search = trim((string) $request->query('search'));
 
-        $preRegisteredVisitors = DB::table('visitors')
-            ->where('status', 'Pre-registered')
-            ->when($search !== '', function ($query) use ($search) {
+        $preRegisteredVisitors = Schema::hasTable('visitors')
+            ? DB::table('visitors')->where('status', 'Pre-registered')->when($search !== '', function ($query) use ($search) {
                 $query->where('visitor_name', 'like', "%{$search}%");
-            })
-            ->orderBy('expected_date')
-            ->orderByDesc('created_at')
-            ->get();
+            })->orderBy('expected_date')->orderByDesc('created_at')->get()
+            : collect();
 
-        $activeVisitors = DB::table('visitors')
-            ->where('status', 'Checked-In')
-            ->orderByDesc('check_in_time')
-            ->get();
+        $activeVisitors = Schema::hasTable('visitors')
+            ? DB::table('visitors')->where('status', 'Checked-In')->orderByDesc('check_in_time')->get()
+            : collect();
 
-        $flats = Flat::orderBy('block')->orderBy('floor')->orderBy('flat_number')->get();
+        $flats = Schema::hasTable('flats')
+            ? Flat::orderBy('block')->orderBy('floor')->orderBy('flat_number')->get()
+            : collect();
 
         return view('security.dashboard', compact('activeVisitors', 'preRegisteredVisitors', 'search', 'flats'));
     }

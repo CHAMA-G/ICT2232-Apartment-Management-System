@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules;
 
 class AdminController extends Controller
@@ -15,43 +16,26 @@ class AdminController extends Controller
     {
         $this->ensureAdministrator();
 
-        $todayVisitors = DB::table('visitors')
-            ->whereDate('created_at', today())
-            ->count();
-
-        $activeBookings = DB::table('bookings')
-            ->where('status', 'Approved')
-            ->count();
-
-        $pendingRequests = DB::table('service_requests')
-            ->where('status', 'Pending')
-            ->count();
-
+        $todayVisitors = Schema::hasTable('visitors') ? DB::table('visitors')->whereDate('created_at', today())->count() : 0;
+        $activeBookings = Schema::hasTable('bookings') ? DB::table('bookings')->where('status', 'Approved')->count() : 0;
+        $pendingRequests = Schema::hasTable('service_requests') ? DB::table('service_requests')->where('status', 'Pending')->count() : 0;
         $pendingRequestsCount = $pendingRequests;
-        $visitorsCount = DB::table('visitors')->count();
-        $bookingsCount = DB::table('bookings')
-            ->where('status', 'Pending')
-            ->count();
+        $visitorsCount = Schema::hasTable('visitors') ? DB::table('visitors')->count() : 0;
+        $bookingsCount = Schema::hasTable('bookings') ? DB::table('bookings')->where('status', 'Pending')->count() : 0;
 
-        $serviceRequests = DB::table('service_requests')
-            ->join('users', 'users.id', '=', 'service_requests.resident_id')
-            ->select('service_requests.*', 'users.name as resident_name', 'users.flat_number as resident_flat')
-            ->orderByDesc('service_requests.created_at')
-            ->get();
+        $serviceRequests = Schema::hasTable('service_requests') && Schema::hasTable('users')
+            ? DB::table('service_requests')->join('users', 'users.id', '=', 'service_requests.resident_id')->select('service_requests.*', 'users.name as resident_name', 'users.flat_number as resident_flat')->orderByDesc('service_requests.created_at')->get()
+            : collect();
 
-        $visitors = DB::table('visitors')
-            ->orderByDesc('created_at')
-            ->get();
+        $visitors = Schema::hasTable('visitors') ? DB::table('visitors')->orderByDesc('created_at')->get() : collect();
 
-        $bookings = DB::table('bookings')
-            ->join('users', 'users.id', '=', 'bookings.resident_id')
-            ->select('bookings.*', 'users.name as resident_name')
-            ->orderByDesc('bookings.booking_date')
-            ->get();
+        $bookings = Schema::hasTable('bookings') && Schema::hasTable('users')
+            ? DB::table('bookings')->join('users', 'users.id', '=', 'bookings.resident_id')->select('bookings.*', 'users.name as resident_name')->orderByDesc('bookings.booking_date')->get()
+            : collect();
 
-        $flats = Flat::orderBy('block')->orderBy('floor')->orderBy('flat_number')->get();
-        $residents = User::where('role', 'resident')->orderBy('name')->get();
-        $securityGuards = User::where('role', 'security')->orderBy('name')->get();
+        $flats = Schema::hasTable('flats') ? Flat::orderBy('block')->orderBy('floor')->orderBy('flat_number')->get() : collect();
+        $residents = Schema::hasTable('users') ? User::where('role', 'resident')->orderBy('name')->get() : collect();
+        $securityGuards = Schema::hasTable('users') ? User::where('role', 'security')->orderBy('name')->get() : collect();
         $activeSection = match (true) {
             request()->routeIs('admin.flats') => 'flats-section',
             request()->routeIs('admin.residents') => 'residents-section',
