@@ -16,7 +16,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            return redirect()->back()->withInput($request->except('password', '_token'))->with('error', 'Session expired or multiple accounts were used in another tab. Please try again.');
+        });
     })->create();
 
 $app->beforeBootstrapping(RegisterProviders::class, static function (Application $app): void {
